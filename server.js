@@ -17,30 +17,41 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-app.get('/api/timestamp/:date_string?', (req, res) => {
-  const dateString = req.params.date_string;
-  let date;
+// Ruta principal que devuelve la hora actual si no se proporciona una fecha
+app.get('/api', (req, res) => {
+  const currentDate = new Date();
+  res.json({
+    unix: currentDate.getTime(),
+    utc: currentDate.toUTCString()
+  });
+});
 
-  if (!dateString) {
-    date = new Date();
+// Ruta que recibe una fecha como parámetro y devuelve su representación en formato UNIX y UTC
+app.get('/api/:date', (req, res) => {
+  const { date } = req.params;
+  let parsedDate;
+
+  if (!date) {
+    // Si no se proporciona una fecha, se usa la fecha actual
+    parsedDate = new Date();
   } else {
-    if (!isNaN(dateString)) {
-      date = new Date(parseInt(dateString));
-    } else {
-      date = new Date(dateString);
-    }
+    parsedDate = new Date(date);
   }
 
-  if (date.toString() === 'Invalid Date') {
+  if (isNaN(parsedDate.getTime())) {
+    // La fecha no es válida
     res.json({ error: 'Invalid Date' });
   } else {
+    // La fecha es válida
     res.json({
-      unix: date.getTime(),
-      utc: date.toUTCString(),
+      unix: parsedDate.getTime(),
+      utc: parsedDate.toUTCString()
     });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Iniciar el servidor en el puerto 3000
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor en ejecución en el puerto ${PORT}`);
 });
