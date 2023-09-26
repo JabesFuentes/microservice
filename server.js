@@ -4,6 +4,15 @@ const port = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 
+app.use('/views', express.static('script.js', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+  },
+}));
+
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
